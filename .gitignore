@@ -1,0 +1,41 @@
+# Ignore the data folder and its contents
+data/
+
+# Ignore virtual environments
+venv/
+.env/
+*.env
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.so
+
+# C extensions
+*.c
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# IDE settings and temporary files
+.vscode/
+.idea/
+*.swp
+*~
+
+# Log files
+logs/
+*.log
+
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Ignore compiled Python files and cache
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Ignore macOS Finder metadata files
+.DS_Store
