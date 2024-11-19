@@ -39,12 +39,13 @@ def main(nb_pruning_iter: int, training_epochs: int, initial_weights, apply_LTH:
 
     (train_dataloader, test_dataloader, val_dataloader) = get_data_loaders(batch_size=60, num_workers=4)
 
+    pruning_rate = 0.2
 
     for n in tqdm(range(1, nb_pruning_iter + 1), leave=False, desc="Pruning Iterations"):
         
         #current_sparsity = get_sparsity(model)
 
-        (train_loss, train_accuracy) = train_model(
+        (early_stop_loss, early_stop_iter, train_loss, train_accuracy) = train_model(
             model=model, 
             dataloader=train_dataloader, 
             criterion=criterion, 
@@ -60,7 +61,7 @@ def main(nb_pruning_iter: int, training_epochs: int, initial_weights, apply_LTH:
             device=DEVICE
         )
 
-        pruning_rate = 0.2
+        # Prune Model
         prune_model(model=model, pruning_rate=pruning_rate)
 
         # Reset Weights

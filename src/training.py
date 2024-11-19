@@ -18,13 +18,22 @@ def train_model(model: torch.nn.Module,
                 optimizer: torch.optim.Optimizer, 
                 device: torch.device,
                 epochs=10
-):
+):  
+    
+    early_stop_loss = float('inf')
+    early_stop_iter = 0
     
     model.train()
 
     for epoch in tqdm(range(epochs), desc="Training", leave=True):
         step_losses = []
         step_accuracies = []
+
+        avg_loss = sum(step_losses) / len(step_losses)
+
+        if avg_loss < early_stop_loss:
+            early_stop_loss = avg_loss
+            early_stop_iter = epoch
         
         for inputs, labels in tqdm(dataloader, desc=f"Epoch {epoch+1}/{epochs}", leave=False):
 
@@ -43,7 +52,7 @@ def train_model(model: torch.nn.Module,
 
     print("Training complete")
 
-    return sum(step_losses)/len(step_losses), sum(step_accuracies)/len(step_accuracies)
+    return early_stop_loss, early_stop_iter, sum(step_losses)/len(step_losses), sum(step_accuracies)/len(step_accuracies)
 
 
 
