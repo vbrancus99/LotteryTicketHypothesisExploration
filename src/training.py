@@ -6,10 +6,8 @@ from torch.nn.utils import prune
 
 
 def __calc_accuracy(preds, labels) -> float:
-    correct = torch.argmax(preds, dim=1) == labels.sum().item()
-    total = labels.size(0)
-    accuracy = correct/total
-    return accuracy
+    correct = torch.argmax(preds, dim=1) == labels
+    return correct.sum().item() / labels.size(0)
 
 
 def train_model(model: torch.nn.Module, 
@@ -29,11 +27,7 @@ def train_model(model: torch.nn.Module,
         step_losses = []
         step_accuracies = []
 
-        avg_loss = sum(step_losses) / len(step_losses)
-
-        if avg_loss < early_stop_loss:
-            early_stop_loss = avg_loss
-            early_stop_iter = epoch
+        
         
         for inputs, labels in tqdm(dataloader, desc=f"Epoch {epoch+1}/{epochs}", leave=False):
 
@@ -45,14 +39,23 @@ def train_model(model: torch.nn.Module,
 
             accuracy = __calc_accuracy(outputs, labels)
 
-            step_losses.append(loss)
+            step_losses.append(loss.item())
             step_accuracies.append(accuracy)
 
-        print(f"Epoch {epoch+1}, Loss: {loss}, Accuracy: {accuracy}")
+        # Calcualte average loss and accuracy after the epoch
+        avg_loss = sum(step_losses) / len(step_losses)
+        avg_accuracy = sum(step_accuracies) / len(step_accuracies)
+
+        # Early Stopping Condition
+        if avg_loss < early_stop_loss:
+            early_stop_loss = avg_loss
+            early_stop_iter = epoch
+
+        print(f"Epoch {epoch+1}, Loss: {avg_loss:.4f}, Accuracy: {avg_accuracy:.4f}")
 
     print("Training complete")
 
-    return early_stop_loss, early_stop_iter, sum(step_losses)/len(step_losses), sum(step_accuracies)/len(step_accuracies)
+    return early_stop_loss, early_stop_iter, avg_loss, avg_accuracy
 
 
 

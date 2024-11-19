@@ -41,6 +41,17 @@ def main(nb_pruning_iter: int, training_epochs: int, initial_weights, apply_LTH:
 
     pruning_rate = 0.2
 
+
+    # Tracking Result
+    results = {
+        "sparsity": [],
+        "early_stop_loss": [],
+        "early_stop_iter": [],
+        "test_loss": [],
+        "test_accuracy": []
+
+    }
+
     for n in tqdm(range(1, nb_pruning_iter + 1), leave=False, desc="Pruning Iterations"):
         
         #current_sparsity = get_sparsity(model)
@@ -61,12 +72,41 @@ def main(nb_pruning_iter: int, training_epochs: int, initial_weights, apply_LTH:
             device=DEVICE
         )
 
+        # Log Metrics
+        results["sparsity"].append(100 - pruning_rate * n * 100)  # Percent weights remaining
+        results["early_stop_loss"].append(early_stop_loss)
+        results["early_stop_iter"].append(early_stop_iter)
+        results["test_loss"].append(test_loss)
+        results["test_accuracy"].append(test_accuracy)
+
+        print(f"Early Stop Iteration: {early_stop_iter}, Test Accuracy: {test_accuracy:.4f}")
+
         # Prune Model
         prune_model(model=model, pruning_rate=pruning_rate)
 
         # Reset Weights
-        weights_to_reinit_to = model.state_dict if apply_LTH else ConvNet().state_dict()
+        weights_to_reinit_to = model.state_dict() if apply_LTH else ConvNet().state_dict()
         model.load_state_dict(weights_to_reinit_to)
 
-main(3, 1800, ConvNet().state_dict())
+    # Print Results Summary
+    print("Pruning complete.")
+    print(f"Results: {results}")
+
+
+
+if __name__ == "__main__":
+    nb_pruning_iter = 5  # Number of pruning iterations
+    training_epochs = 3  # Number of training epochs per iteration
+    apply_LTH = True  # Whether to reset to initial weights after pruning
+
+    # Call the main function
+    main_results = main(
+        nb_pruning_iter=nb_pruning_iter,
+        training_epochs=training_epochs,
+        initial_weights=ConvNet().state_dict(),
+        apply_LTH=apply_LTH
+    )
+
+    # Check the results
+    print("Final Results:", main_results)
 
