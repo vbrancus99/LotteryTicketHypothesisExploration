@@ -11,18 +11,7 @@ from ConvNet import ConvNet
 from data_handler import get_data_loaders
 from training import train_model, test_model, prune_model
 
-"""
-def get_sparsity(model: torch.nn.Module):
-    return 100. * float(
-        torch.sum(model.classifier[0].weight == 0)
-        + torch.sum(model.classifier[0].weight == 0)
-        + torch.sum(model.classifier[0].weight == 0)
-    ) / float(
-         model.classifier[0].weight.nelement()
-        + model.classifier[0].weight.nelement()
-        + model.classifier[0].weight.nelement()    
-    )
-"""
+
 
 def main(nb_pruning_iter: int, training_epochs: int, initial_weights, apply_LTH: bool = True):
 
@@ -95,18 +84,31 @@ def main(nb_pruning_iter: int, training_epochs: int, initial_weights, apply_LTH:
 
 
 if __name__ == "__main__":
-    nb_pruning_iter = 5  # Number of pruning iterations
-    training_epochs = 3  # Number of training epochs per iteration
-    apply_LTH = True  # Whether to reset to initial weights after pruning
+    NB_PRUNING_ITER = 5  # Number of pruning iterations
+    TRAINING_EPOCHS = 3  # Number of training epochs per iteration
+    INITIAL_WEIGHTS = ConvNet().state_dict
 
     # Call the main function
-    main_results = main(
-        nb_pruning_iter=nb_pruning_iter,
-        training_epochs=training_epochs,
-        initial_weights=ConvNet().state_dict(),
-        apply_LTH=apply_LTH
+    main_results_lth = main(
+        nb_pruning_iter=NB_PRUNING_ITER,
+        training_epochs=TRAINING_EPOCHS,
+        initial_weights=INITIAL_WEIGHTS,
+        apply_LTH=True
     )
 
+    main_results_rand = main(
+        nb_pruning_iter=NB_PRUNING_ITER,
+        training_epochs=TRAINING_EPOCHS,
+        initial_weights=INITIAL_WEIGHTS,
+        apply_LTH=False
+    )    
+    
+
+
+
     # Check the results
-    print("Final Results:", main_results)
+    print("Final Results LTH:", main_results_lth)
+    print("Final Results RAND:", main_results_lth)
+
+
 

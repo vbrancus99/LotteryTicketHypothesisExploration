@@ -31,6 +31,8 @@ def train_model(model: torch.nn.Module,
         
         for inputs, labels in tqdm(dataloader, desc=f"Epoch {epoch+1}/{epochs}", leave=False):
 
+            inputs, labels = inputs.to(device), labels.to(device)
+
             optimizer.zero_grad()
             outputs = model(inputs)
             loss = criterion(outputs, labels)
@@ -63,7 +65,7 @@ def test_model(model: torch.nn.Module,
                 dataloader: DataLoader,  
                 criterion: torch.nn.Module, 
                 device: torch.device,
-):
+): 
     
     model.eval()
 
@@ -81,7 +83,7 @@ def test_model(model: torch.nn.Module,
 
             accuracy = __calc_accuracy(outputs, labels)
 
-            step_losses.append(loss)
+            step_losses.append(loss.item())
             step_accuracies.append(accuracy)
 
     return sum(step_losses)/len(step_losses), sum(step_accuracies)/len(step_accuracies)
