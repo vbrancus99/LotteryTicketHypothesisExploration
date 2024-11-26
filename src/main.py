@@ -49,14 +49,15 @@ def main(nb_pruning_iter: int, training_epochs: int, initial_weights, apply_LTH:
         "sparsity": [],
         "early_stop_loss": [],
         "early_stop_iter": [],
-        "test_loss": [],
-        "test_accuracy": []
+        "test_loss": {},
+        "test_accuracy": {}
 
     }
 
     for n in tqdm(range(1, nb_pruning_iter + 1), leave=False, desc="Pruning Iterations"):
         
-        #current_sparsity = get_sparsity(model)
+        # Calculate sparsity level
+        sparsity_level = pruning_rate * n * 100  # Percent weights pruned
 
         (early_stop_loss, early_stop_iter, train_loss, train_accuracy) = train_model(
             model=model, 
@@ -74,12 +75,16 @@ def main(nb_pruning_iter: int, training_epochs: int, initial_weights, apply_LTH:
             device=DEVICE
         )
 
+
+
         # Log Metrics
-        results["sparsity"].append(100 - pruning_rate * n * 100)  # Percent weights remaining
+        results["sparsity"].append(sparsity_level)  # Percent weights pruned
         results["early_stop_loss"].append(early_stop_loss)
         results["early_stop_iter"].append(early_stop_iter)
-        results["test_loss"].append(test_loss)
-        results["test_accuracy"].append(test_accuracy)
+
+        # Convert losses and accuracies into dictionaries keyed by sparsity level
+        results.setdefault("test_loss", {})[sparsity_level] = test_loss
+        results.setdefault("test_accuracy", {})[sparsity_level] = test_accuracy
 
         print(f"Early Stop Iteration: {early_stop_iter}, Test Accuracy: {test_accuracy:.4f}")
 
@@ -98,9 +103,9 @@ def main(nb_pruning_iter: int, training_epochs: int, initial_weights, apply_LTH:
 
 
 if __name__ == "__main__":
-    NB_PRUNING_ITER = 2  # Number of pruning iterations
-    TRAINING_EPOCHS = 1  # Number of training epochs per iteration
-    INITIAL_WEIGHTS = ConvNet().state_dict
+    NB_PRUNING_ITER = 5  # Number of pruning iterations
+    TRAINING_EPOCHS = 5  # Number of training epochs per iteration
+    INITIAL_WEIGHTS = ConvNet().state_dict()
 
     # Call the main function
     lottery_ticket_results = main(
@@ -118,9 +123,9 @@ if __name__ == "__main__":
     )    
 
     plot_test_losses(
-        losses_lth=lottery_ticket_results["test_loss"],
-        losses_rand=random_init_results["test_loss"],
-        output_image_path="test_losses.png"
+        losses_lth=lottery_ticket_results["early_stop_loss"],
+        losses_rand=random_init_results["early_stop_loss"],
+        output_image_path="early_stop_losses.png"
     )
     
     plot_test_accuracy(

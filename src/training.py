@@ -96,3 +96,5 @@ def prune_model(model: torch.nn.Module, pruning_rate: float):
         if isinstance(module, nn.Conv2d) or isinstance(module, nn.Linear):
             # apply pruning to convolutional and fully connected layers
             prune.l1_unstructured(module, name="weight", amount=pruning_rate)
+            # Remove pruning reparameterization
+            prune.remove(module, "weight")
